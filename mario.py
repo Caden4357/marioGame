@@ -3,6 +3,9 @@ from pygame.locals import *
 
 pygame.init()
 
+clock = pygame.time.Clock()
+fps = 60
+
 screen_width = 1000
 screen_height = 1000
 
@@ -14,14 +17,54 @@ sun_image = pygame.image.load("_python/mario/images/sun.png")
 bg_image = pygame.image.load("_python/mario/images/sky.png")
 
 run = True
-title_size = 200
+
+class Player():
+    def __init__(self, x, y):
+        img = pygame.image.load('_python/mario/images/guy1.png')
+        self.image = pygame.transform.scale(img, (40,80))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.vel_y = 0
+        self.jumped = False
+    def update(self):
+        dx = 0 
+        dy = 0
+
+        key = pygame.key.get_pressed()
+        if key[pygame.K_SPACE] and self.jumped == False:
+            self.vel_y =- 15
+            self.jumped = True
+        if key[pygame.K_SPACE]:
+            self.jumped = False
+        if key[pygame.K_LEFT]:
+            dx -= 5
+        if key[pygame.K_RIGHT]:
+            dx += 5
+
+        #gravity 
+        self.vel_y+=1
+        if self.vel_y > 10:
+            self.vel_y = 10
+
+        dy += self.vel_y
+        
+        self.rect.x += dx
+        self.rect.y += dy
+
+        if self.rect.bottom > screen_height:
+            self.rect.bottom = screen_height
+            dy = 0
 
 
 
-class world():
+        screen.blit(self.image, self.rect) 
+
+class World():
     def __init__(self, data):
         self.tile_list = []
-        dirt_image = sun_image = pygame.image.load("_python/mario/images/dirt.png")
+        dirt_image = pygame.image.load("_python/mario/images/dirt.png")
+        grass_image = pygame.image.load("_python/mario/images/grass.png")
         row_count = 0
         for row in data:
             col_count = 0
@@ -29,10 +72,24 @@ class world():
                 if tile == 1:
                     img = pygame.transform.scale(dirt_image,(tile_size, tile_size))
                     img_rect = img.get_rect()
-                    img.rect.x = col_count*tile_size
-                    img.rect.y = col_count*tile_size
+                    img_rect.x = col_count*tile_size
+                    img_rect.y = row_count*tile_size
                     tile = (img,img_rect)
-                    self.tile_list.append()
+                    self.tile_list.append(tile)
+                if tile == 2:
+                    img = pygame.transform.scale(grass_image,(tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = col_count*tile_size
+                    img_rect.y = row_count*tile_size
+                    tile = (img,img_rect)
+                    self.tile_list.append(tile)
+                col_count += 1
+            row_count += 1
+
+    
+    def draw(self):
+        for tile in self.tile_list:
+            screen.blit(tile[0], tile[1])
 
 
 
@@ -41,25 +98,49 @@ class world():
 
 
 world_data = [
-[1,1,1,1,1],
-[1,0,0,0,1],
-[1,0,0,0,1],
-[1,0,0,0,1],
-[1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,8,1],
+[1,0,0,0,0,2,0,0,0,0,0,7,0,0,0,0,0,0,2,1,1],
+[1,0,0,0,0,0,0,0,0,2,2,0,7,0,5,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,5,0,0,0,2,2,0,0,0,0,0,1,1],
+[1,7,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,7,0,0,7,0,0,0,0,1,1],
+[1,0,2,0,0,7,0,7,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,2,0,0,4,0,0,0,0,3,0,0,3,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,7,0,7,0,0,0,0,2,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,2,0,2,0,2,2,2,2,1,1,1],
+[1,0,0,0,0,0,2,2,2,6,6,6,6,6,1,1,1,1,1,1,1],
+[1,0,0,0,0,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+
 ]
 
 
 
-
+tile_size = 50
 
 def draw_grid():
-    for line in range(0,6):
-        pygame.draw.line(screen,(255,255,255), (0,line*title_size), (screen_width,line*title_size))
-        pygame.draw.line(screen,(255,255,255), (line*title_size,0), (line*title_size, screen_width))
+    for line in range(0,20):
+        pygame.draw.line(screen,(255,255,255), (0,line*tile_size), (screen_width,line*tile_size))
+        pygame.draw.line(screen,(255,255,255), (line*tile_size,0), (line*tile_size, screen_width))
+
+world = World(world_data)
+player = Player(200, screen_height-180)
+
 while run:
+    clock.tick(fps)
     screen.blit(bg_image,(0,0))
     screen.blit(sun_image,(100,100))
+    world.draw()
+
     draw_grid()
+    player.update()
 
 
     for event in pygame.event.get():
