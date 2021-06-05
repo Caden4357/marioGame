@@ -70,7 +70,7 @@ class Player():
             if self.direction ==- 1:
                 self.image = self.images_left[self.index]
 
-        
+
 
         #Animation
         if self.counter > walk_cooldown:
@@ -126,7 +126,7 @@ class Player():
 
         screen.blit(self.image, self.rect) 
         pygame.draw.rect(screen, (255,255,255), self.rect,2)
-
+blob_group = pygame.sprite.Group()
 class World():
     def __init__(self, data):
         self.tile_list = []
@@ -150,6 +150,12 @@ class World():
                     img_rect.y = row_count*tile_size
                     tile = (img,img_rect)
                     self.tile_list.append(tile)
+
+                if tile == 3:
+                    blob = Enemy(col_count*tile_size, row_count*tile_size)
+                    blob_group.add(blob)
+
+
                 col_count += 1
             row_count += 1
 
@@ -162,12 +168,23 @@ class World():
 
 
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("_python/mario/images/blob.png")
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+
+
 
 
 
 world_data = [
 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 [1,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,8,1],
 [1,0,0,0,0,2,0,0,0,0,0,7,0,0,0,0,0,0,2,1,1],
 [1,0,0,0,0,0,0,0,0,2,2,0,7,0,5,0,0,0,0,1,1],
@@ -198,14 +215,19 @@ def draw_grid():
         pygame.draw.line(screen,(255,255,255), (0,line*tile_size), (screen_width,line*tile_size))
         pygame.draw.line(screen,(255,255,255), (line*tile_size,0), (line*tile_size, screen_width))
 
-world = World(world_data)
+
 player = Player(200, screen_height-180)
+
+blob_group = pygame.sprite.Group()
+
+world = World(world_data)
 
 while run:
     clock.tick(fps)
     screen.blit(bg_image,(0,0))
     screen.blit(sun_image,(100,100))
     world.draw()
+    blob_group.draw(screen)
 
     # draw_grid()
     player.update()
