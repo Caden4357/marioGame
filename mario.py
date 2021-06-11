@@ -152,7 +152,7 @@ class World():
                     self.tile_list.append(tile)
 
                 if tile == 3:
-                    blob = Enemy(col_count*tile_size, row_count*tile_size)
+                    blob = Enemy(col_count*tile_size, row_count*tile_size+15)
                     blob_group.add(blob)
 
 
@@ -175,6 +175,15 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.move_direction = 1
+        self.move_counter = 0
+    def update(self):
+        self.rect.x += self.move_direction 
+        self.move_counter += 1
+        if abs(self.move_counter) > 50:
+            self.move_direction *=- 1
+            self.move_counter *=- 1
+
 
 
 
@@ -228,6 +237,7 @@ while run:
     screen.blit(sun_image,(100,100))
     world.draw()
     blob_group.draw(screen)
+    blob_group.update()
 
     # draw_grid()
     player.update()
